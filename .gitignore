@@ -1,0 +1,6 @@
+settings.toml
+alembic/
+versions/
+*.log
+*.sqlite
+*.db
