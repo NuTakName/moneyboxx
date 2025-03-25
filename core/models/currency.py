@@ -1,8 +1,9 @@
 from enum import StrEnum, auto
 from core.base import BaseModel
+from core.async_session import async_session
 
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import Integer, String, Enum
+from sqlalchemy import Integer, String, Enum, select
 
 
 class CurrencyTypeEnum(StrEnum):
@@ -23,3 +24,12 @@ class Currency(BaseModel):
         index=True
     )
     symbol: Mapped[str] = mapped_column(String(10), nullable=True)
+
+
+    @staticmethod
+    async def get_by_name(name: str) -> "Currency":
+        async with async_session() as session:
+            result = await session.execute(
+                select(Currency).where(Currency.name.ilike(name))
+            )
+            return result.scalars().first()
