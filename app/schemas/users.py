@@ -5,6 +5,9 @@ from datetime import datetime
 class UserSchema(BaseModel):
     id: int = Field(ge=0)
     name: str
+    current_budget: int | None = None
+    current_moneybox: int | None = None
+
 
 
 class UserResponseSchema(UserSchema):
@@ -14,3 +17,5 @@ class UserResponseSchema(UserSchema):
     is_admin: bool
     money: int = Field(ge=0)
     get_bonus: bool
+    current_budget: int | None = None
+    current_moneybox: int | None = None

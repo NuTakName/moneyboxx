@@ -13,7 +13,9 @@ router = APIRouter(
 async def add_user(data: UserSchema):
     user = User(
         id=data.id,
-        name=data.name
+        name=data.name,
+        current_moneybox=data.current_moneybox,
+        current_budget=data.current_budget
     )
     return await user.add()
 
