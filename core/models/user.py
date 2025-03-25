@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import BIGINT, String, Boolean, Integer, select
+from sqlalchemy import BIGINT, String, Boolean, Integer, select, ForeignKey
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -23,6 +23,8 @@ class User(BaseModel):
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
     money: Mapped[int] = mapped_column(Integer, default=100, server_default='100', nullable=False)
     get_bonus: Mapped[bool] = mapped_column(Boolean, default=False, server_default='false', nullable=False)
+    current_budget: Mapped[int] = mapped_column(Integer, ForeignKey("budgets.id"), nullable=True)
+    current_moneybox: Mapped[int] = mapped_column(Integer, ForeignKey("moneybox.id"), nullable=True)
 
 
 
