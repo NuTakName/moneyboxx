@@ -1,11 +1,13 @@
 import uvicorn
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
-from app.routers import users
+from app.routers import users, budgets, currency
 
 
 app = FastAPI()
 app.include_router(users.router)
+app.include_router(budgets.router)
+app.include_router(currency.router)
 
 
 
