@@ -19,3 +19,8 @@ class UserResponseSchema(UserSchema):
     get_bonus: bool
     current_budget: int | None = None
     current_moneybox: int | None = None
+
+
+class UserCurrentBudget(BaseModel):
+    user_id: int = Field(ge=0)
+    current_budget: int = Field(ge=0)
