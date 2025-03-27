@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import BIGINT, String, Boolean, Integer, select, ForeignKey
+from sqlalchemy import BIGINT, String, Boolean, Integer, select, ForeignKey, update
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -36,3 +36,13 @@ class User(BaseModel):
             )
             return result.scalars().first()
 
+
+    @staticmethod
+    async def set_current_budget(user_id: int, current_budget: int) -> "User":
+        async with async_session() as session:
+            result = await session.execute(
+                update(User).where(User.id == user_id)
+                .values(current_budget=current_budget)
+                .returning(User)
+            )
+            return result.scalars().first()
