@@ -14,6 +14,7 @@ app.include_router(operations.router)
 
 
 
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
