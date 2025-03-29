@@ -21,3 +21,8 @@ async def add_operation(data: OperationSchema):
         sub_category_id=data.sub_category_id
     )
     return await operation.add()
+
+
+@router.get("/list/{current_budget_id}", response_model=list[OperationResponseSchema])
+async def get_operations(current_budget_id: int):
+    return await Operation.get_operations(current_budget_id=current_budget_id)
