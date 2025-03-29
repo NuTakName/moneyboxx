@@ -1,12 +1,13 @@
 import datetime
 from sqlalchemy.dialects import postgresql
-from core.base import BaseModel
-from core.async_session import async_session
-
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import Integer, String, Enum, ForeignKey, BIGINT, select
 
-from core.models.category import CategoryTypeEnum
+from core.base import BaseModel
+from core.async_session import async_session
+from core.models.category import CategoryTypeEnum, Category
+from core.models.currency import Currency
+from core.models.budget import Budget
 
 
 class Operation(BaseModel):
@@ -46,9 +47,20 @@ class Operation(BaseModel):
 
 
     @staticmethod
-    async def get_operations(current_budget_id: int) -> list["Operation"]:
+    async def get_operations(current_budget_id: int) -> list[dict]:
         async with async_session() as session:
             result = await session.execute(
-                select(Operation).where(Operation.budget_id == current_budget_id)
+                select(Operation, Category.name, Currency)
+                .join(Category, Category.id == Operation.category_id)
+                .join(Budget, Budget.id == Operation.budget_id)
+                .join(Currency, Currency.id == Budget.currency_id)
+                .where(Operation.budget_id == current_budget_id)
             )
-            return result.scalars().all()
+            results = []
+            for operation, category_name, currency in result.all():
+                operation = operation.to_dict()
+                operation["category_name"] = category_name
+                operation["currency_code"] = currency.code
+                operation["currency_symbol"] = currency.symbol
+                results.append(operation)
+            return results
