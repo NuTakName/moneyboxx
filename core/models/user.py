@@ -45,4 +45,5 @@ class User(BaseModel):
                 .values(current_budget=current_budget)
                 .returning(User)
             )
+            await session.commit()
             return result.scalars().first()
