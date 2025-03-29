@@ -1,9 +1,10 @@
 import datetime
 from sqlalchemy.dialects import postgresql
 from core.base import BaseModel
+from core.async_session import async_session
 
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import Integer, String, Enum, ForeignKey, BIGINT
+from sqlalchemy import Integer, String, Enum, ForeignKey, BIGINT, select
 
 from core.models.category import CategoryTypeEnum
 
@@ -42,3 +43,12 @@ class Operation(BaseModel):
         ForeignKey("categories.id", ondelete="CASCADE"),
         nullable=True
     )
+
+
+    @staticmethod
+    async def get_operations(current_budget_id: int) -> list["Operation"]:
+        async with async_session() as session:
+            result = await session.execute(
+                select(Operation).where(Operation.budget_id == current_budget_id)
+            )
+            return result.scalars().all()
