@@ -18,3 +18,8 @@ class OperationSchema(BaseModel):
 class OperationResponseSchema(OperationSchema):
     id: int = Field(ge=0)
     date: datetime.datetime
+
+class OperationAndCategoryResponseSchema(OperationResponseSchema):
+    category_name: str
+    currency_code: str
+    currency_symbol: str

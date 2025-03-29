@@ -1,6 +1,10 @@
 from fastapi import APIRouter, HTTPException
 
-from app.schemas.operations import OperationSchema, OperationResponseSchema
+from app.schemas.operations import (
+    OperationSchema,
+    OperationResponseSchema,
+    OperationAndCategoryResponseSchema
+)
 from core.models.operation import Operation
 
 router = APIRouter(
@@ -23,6 +27,6 @@ async def add_operation(data: OperationSchema):
     return await operation.add()
 
 
-@router.get("/list/{current_budget_id}", response_model=list[OperationResponseSchema])
+@router.get("/list/{current_budget_id}", response_model=list[OperationAndCategoryResponseSchema])
 async def get_operations(current_budget_id: int):
     return await Operation.get_operations(current_budget_id=current_budget_id)
