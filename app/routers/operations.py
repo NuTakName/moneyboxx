@@ -15,16 +15,24 @@ router = APIRouter(
 
 
 @router.post("/", response_model=OperationResponseSchema)
-async def add_operation(data: OperationSchema):
-    operation = Operation(
+async def add_or_update_operation(data: OperationSchema):
+    operation = await Operation.update_operation(
         budget_id=data.budget_id,
-        type_=data.type_,
         value=data.value,
-        description=data.description,
         category_id=data.category_id,
-        sub_category_id=data.sub_category_id
+        description=data.description
     )
-    return await operation.add()
+    if not operation:
+        operation = Operation(
+            budget_id=data.budget_id,
+            type_=data.type_,
+            value=data.value,
+            description=data.description,
+            category_id=data.category_id,
+            sub_category_id=data.sub_category_id
+        )
+        operation = await operation.add()
+    return operation
 
 
 @router.get("/list/{current_budget_id}", response_model=list[OperationAndCategoryResponseSchema])
