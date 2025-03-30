@@ -1,7 +1,7 @@
 import datetime
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import Integer, String, Enum, ForeignKey, BIGINT, select
+from sqlalchemy import Integer, String, Enum, ForeignKey, BIGINT, select, update, and_
 
 from core.base import BaseModel
 from core.async_session import async_session
@@ -64,3 +64,22 @@ class Operation(BaseModel):
                 operation["currency_symbol"] = currency.symbol
                 results.append(operation)
             return results
+
+
+    @staticmethod
+    async def update_operation(
+            budget_id: int, value: int, category_id: int, description: str
+    ) -> "Operation":
+        async with async_session() as session:
+            result = await session.execute(
+                update(Operation)
+                .where(
+                    and_(Operation.budget_id == budget_id,
+                         Operation.category_id == category_id)
+                )
+                .values(value=Operation.value + value, description=description)
+                .returning(Operation)
+            )
+            await session.commit()
+            return result.scalars().first()
+
