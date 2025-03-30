@@ -50,11 +50,34 @@ class Operation(BaseModel):
     async def get_operations(current_budget_id: int) -> list[dict]:
         async with async_session() as session:
             result = await session.execute(
-                select(Operation, Category.name, Currency)
+                select(Operation, Category, Currency)
                 .join(Category, Category.id == Operation.category_id)
                 .join(Budget, Budget.id == Operation.budget_id)
                 .join(Currency, Currency.id == Budget.currency_id)
                 .where(Operation.budget_id == current_budget_id)
+            )
+            data = {}
+            for operation, category, currency in result.all():
+                if category.id not in data:
+                    operation = operation.to_dict()
+                    operation["category_name"] = category.name
+                    operation["currency_code"] = currency.code
+                    operation["currency_symbol"] = currency.symbol
+                    data[category.id] = operation
+                else:
+                    data[category.id]["value"] += operation.value
+            return list(data.values())
+
+
+    @staticmethod
+    async def get_operation_by_category_id(category_id: int) -> list[dict]:
+        async with async_session() as session:
+            result = await session.execute(
+                select(Operation, Category.name, Currency)
+                .join(Category, Category.id == Operation.category_id)
+                .join(Budget, Budget.id == Operation.budget_id)
+                .join(Currency, Currency.id == Budget.currency_id)
+                .where(Operation.category_id == category_id)
             )
             results = []
             for operation, category_name, currency in result.all():
@@ -64,22 +87,3 @@ class Operation(BaseModel):
                 operation["currency_symbol"] = currency.symbol
                 results.append(operation)
             return results
-
-
-    @staticmethod
-    async def update_operation(
-            budget_id: int, value: int, category_id: int, description: str
-    ) -> "Operation":
-        async with async_session() as session:
-            result = await session.execute(
-                update(Operation)
-                .where(
-                    and_(Operation.budget_id == budget_id,
-                         Operation.category_id == category_id)
-                )
-                .values(value=Operation.value + value, description=description)
-                .returning(Operation)
-            )
-            await session.commit()
-            return result.scalars().first()
-
