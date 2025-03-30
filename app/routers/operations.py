@@ -1,3 +1,5 @@
+from types import NoneType
+
 from fastapi import APIRouter, HTTPException
 
 from app.schemas.operations import (
@@ -16,25 +18,22 @@ router = APIRouter(
 
 @router.post("/", response_model=OperationResponseSchema)
 async def add_or_update_operation(data: OperationSchema):
-    operation = await Operation.update_operation(
+    operation = Operation(
         budget_id=data.budget_id,
+        type_=data.type_,
         value=data.value,
+        description=data.description,
         category_id=data.category_id,
-        description=data.description
+        sub_category_id=data.sub_category_id
     )
-    if not operation:
-        operation = Operation(
-            budget_id=data.budget_id,
-            type_=data.type_,
-            value=data.value,
-            description=data.description,
-            category_id=data.category_id,
-            sub_category_id=data.sub_category_id
-        )
-        operation = await operation.add()
-    return operation
+    return await operation.add()
 
-
+#todo добавить поиск по месяцу
 @router.get("/list/{current_budget_id}", response_model=list[OperationAndCategoryResponseSchema])
 async def get_operations(current_budget_id: int):
     return await Operation.get_operations(current_budget_id=current_budget_id)
+
+#todo добавить поиск по месяцу
+@router.get('/list_by_category_id/{category_id}', response_model=list[OperationAndCategoryResponseSchema])
+async def get_operations_by_category_id(category_id: int):
+    return await Operation.get_operation_by_category_id(category_id=category_id)
