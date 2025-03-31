@@ -1,7 +1,20 @@
 import datetime
+from typing import Union
+
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import Integer, String, Enum, ForeignKey, BIGINT, select, update, and_, extract
+from sqlalchemy import (
+    Integer,
+    String,
+    Enum,
+    ForeignKey,
+    BIGINT,
+    select,
+    update,
+    and_,
+    extract,
+    func, case
+)
 
 from app.schemas.operations import UpdateOperationSchema
 from core.base import BaseModel
@@ -105,7 +118,7 @@ class Operation(BaseModel):
 
 
     @staticmethod
-    async def update_operation(operation: UpdateOperationSchema) -> "Operation":
+    async def update_operation(operation: UpdateOperationSchema) -> Union["Operation", None]:
         async with async_session() as session:
             result = await session.execute(
                 update(Operation).where(Operation.id == operation.id)
@@ -117,3 +130,28 @@ class Operation(BaseModel):
             if operation:
                 await session.refresh(operation)
                 return operation
+
+
+    @staticmethod
+    async def get_total_amount(month: int, current_budget_id: int) -> dict:
+        async with async_session() as session:
+            query = await session.execute(
+                select(
+                    func.sum(case((and_(
+                        Operation.type_ == CategoryTypeEnum.income,
+                        extract("month", Operation.date) == month,
+                        Operation.budget_id == current_budget_id), Operation.value),
+                        else_=0)),
+                    func.sum(case((and_(
+                        Operation.type_ == CategoryTypeEnum.expense,
+                        extract("month", Operation.date) == month,
+                        Operation.budget_id == current_budget_id), Operation.value),
+                        else_=0))
+                )
+            )
+            result = query.first()
+            data = {
+                "total_amount_income": result[0],
+                "total_amount_expense": result[1]
+            }
+            return data
