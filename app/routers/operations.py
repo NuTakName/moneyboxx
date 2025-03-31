@@ -39,10 +39,9 @@ async def update_operation(data: UpdateOperationSchema):
         raise HTTPException(status_code=404, detail="Operation not found")
 
 
-#todo добавить поиск по месяцу
-@router.get("/list/{current_budget_id}", response_model=list[OperationAndCategoryResponseSchema])
-async def get_operations(current_budget_id: int):
-    return await Operation.get_operations(current_budget_id=current_budget_id)
+@router.get("/list/{current_budget_id}/{month}", response_model=list[OperationAndCategoryResponseSchema])
+async def get_operations(current_budget_id: int, month: int):
+    return await Operation.get_operations(current_budget_id=current_budget_id, month=month)
 
 #todo добавить поиск по месяцу
 @router.get('/list_by_category_id/{category_id}', response_model=list[OperationAndCategoryResponseSchema])
