@@ -1,7 +1,7 @@
 import datetime
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import Integer, String, Enum, ForeignKey, BIGINT, select, update, and_
+from sqlalchemy import Integer, String, Enum, ForeignKey, BIGINT, select, update, and_, extract
 
 from app.schemas.operations import UpdateOperationSchema
 from core.base import BaseModel
@@ -48,14 +48,18 @@ class Operation(BaseModel):
 
 
     @staticmethod
-    async def get_operations(current_budget_id: int) -> list[dict]:
+    async def get_operations(current_budget_id: int, month: int) -> list[dict]:
         async with async_session() as session:
             result = await session.execute(
                 select(Operation, Category, Currency)
                 .join(Category, Category.id == Operation.category_id)
                 .join(Budget, Budget.id == Operation.budget_id)
                 .join(Currency, Currency.id == Budget.currency_id)
-                .where(Operation.budget_id == current_budget_id)
+                .where(
+                    and_(
+                        Operation.budget_id == current_budget_id,
+                        extract("month", Operation.date) == month,
+                    ))
             )
             data = {}
             for operation, category, currency in result.all():
