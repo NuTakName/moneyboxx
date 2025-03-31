@@ -14,6 +14,9 @@ class OperationSchema(BaseModel):
     sub_category_id: int | None = None
 
 
+class UpdateOperationSchema(OperationSchema):
+    id: int = Field(ge=0)
+
 
 class OperationResponseSchema(OperationSchema):
     id: int = Field(ge=0)
