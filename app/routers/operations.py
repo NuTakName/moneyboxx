@@ -6,7 +6,8 @@ from app.schemas.operations import (
     OperationSchema,
     OperationResponseSchema,
     OperationAndCategoryResponseSchema,
-    UpdateOperationSchema
+    UpdateOperationSchema,
+    OperationTotalAmount
 )
 from core.models.operation import Operation
 
@@ -56,3 +57,11 @@ async def delete_operation(operation_id: int):
         await operation.delete()
     else:
         raise HTTPException(status_code=404, detail="Operation not found")
+
+
+@router.get("/total_amount/{month}/{current_budget_id}", response_model=OperationTotalAmount)
+async def get_total_amount(month: int, current_budget_id: int):
+    total_amount = await Operation.get_total_amount(
+        month=month, current_budget_id=current_budget_id
+    )
+    return total_amount
