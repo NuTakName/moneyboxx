@@ -3,6 +3,7 @@ from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import Integer, String, Enum, ForeignKey, BIGINT, select, update, and_
 
+from app.schemas.operations import UpdateOperationSchema
 from core.base import BaseModel
 from core.async_session import async_session
 from core.models.category import CategoryTypeEnum, Category
@@ -87,3 +88,28 @@ class Operation(BaseModel):
                 operation["currency_symbol"] = currency.symbol
                 results.append(operation)
             return results
+
+
+
+    @staticmethod
+    async def get_operation_by_id(operation_id: int) -> "Operation":
+        async with async_session() as session:
+            result = await session.execute(
+                select(Operation).where(Operation.id == operation_id)
+            )
+            return result.scalars().first()
+
+
+    @staticmethod
+    async def update_operation(operation: UpdateOperationSchema) -> "Operation":
+        async with async_session() as session:
+            result = await session.execute(
+                update(Operation).where(Operation.id == operation.id)
+                .values(**operation.model_dump())
+                .returning(Operation)
+            )
+            await session.commit()
+            operation = result.scalars().first()
+            if operation:
+                await session.refresh(operation)
+                return operation
