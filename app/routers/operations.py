@@ -27,7 +27,8 @@ async def add_operation(data: OperationSchema):
         value=data.value,
         description=data.description,
         category_id=data.category_id,
-        sub_category_id=data.sub_category_id
+        sub_category_id=data.sub_category_id,
+        date=data.date
     )
     return await operation.add()
 
