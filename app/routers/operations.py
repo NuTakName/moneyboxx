@@ -44,10 +44,13 @@ async def update_operation(data: UpdateOperationSchema):
 async def get_operations(current_budget_id: int, month: int):
     return await Operation.get_operations(current_budget_id=current_budget_id, month=month)
 
-#todo добавить поиск по месяцу
-@router.get('/list_by_category_id/{category_id}', response_model=list[OperationAndCategoryResponseSchema])
-async def get_operations_by_category_id(category_id: int):
-    return await Operation.get_operation_by_category_id(category_id=category_id)
+
+@router.get(
+    '/list_by_category_id/{category_id}/{month}',
+    response_model=list[OperationAndCategoryResponseSchema]
+)
+async def get_operations_by_category_id(category_id: int, month: int):
+    return await Operation.get_operation_by_category_id(category_id=category_id, month=month)
 
 
 @router.delete("/{operation_id}", response_model=NoneType)
