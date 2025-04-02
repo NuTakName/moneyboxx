@@ -162,3 +162,22 @@ class Operation(BaseModel):
                 "total_amount_expense": result[1]
             }
             return data
+
+
+    @staticmethod
+    async def get_difference(current_budget_id: int) -> dict:
+        async with async_session() as session:
+            query = await session.execute(
+                select(
+                func.sum(case((and_(
+                    Operation.type_ == CategoryTypeEnum.income,
+                    Operation.budget_id == current_budget_id), Operation.value),
+                    else_=0)),
+                func.sum(case((and_(
+                    Operation.type_ == CategoryTypeEnum.expense,
+                    Operation.budget_id == current_budget_id), Operation.value),
+                    else_=0))
+            ))
+            result = query.first()
+            data = {"difference": result[0] - result[1]}
+            return data
