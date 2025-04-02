@@ -7,7 +7,8 @@ from app.schemas.operations import (
     OperationResponseSchema,
     OperationAndCategoryResponseSchema,
     UpdateOperationSchema,
-    OperationTotalAmount
+    OperationTotalAmount,
+    DifferenceResponseSchema
 )
 from core.models.category import CategoryTypeEnum
 from core.models.operation import Operation
@@ -77,3 +78,7 @@ async def get_total_amount(month: int, current_budget_id: int):
         month=month, current_budget_id=current_budget_id
     )
     return total_amount
+
+@router.get("/difference/{current_budget_id}", response_model=DifferenceResponseSchema)
+async def get_difference(current_budget_id: int):
+    return await Operation.get_difference(current_budget_id=current_budget_id)

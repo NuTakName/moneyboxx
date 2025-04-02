@@ -33,3 +33,6 @@ class OperationAndCategoryResponseSchema(OperationResponseSchema):
 class OperationTotalAmount(BaseModel):
     total_amount_income: int
     total_amount_expense: int
+
+class DifferenceResponseSchema(BaseModel):
+    difference: int
