@@ -9,6 +9,7 @@ from app.schemas.operations import (
     UpdateOperationSchema,
     OperationTotalAmount
 )
+from core.models.category import CategoryTypeEnum
 from core.models.operation import Operation
 
 router = APIRouter(
@@ -50,7 +51,14 @@ async def get_operations(current_budget_id: int, month: int):
     response_model=list[OperationAndCategoryResponseSchema]
 )
 async def get_operations_by_category_id(category_id: int, month: int):
-    return await Operation.get_operation_by_category_id(category_id=category_id, month=month)
+    return await Operation.get_operation_by_category_id_or_type(category_id=category_id, month=month)
+
+@router.get(
+    '/list_by_type/{type_}/{month}',
+    response_model=list[OperationAndCategoryResponseSchema]
+)
+async def get_operations_by_category_id_or_type(month: int, type_: CategoryTypeEnum):
+    return await Operation.get_operation_by_category_id_or_type(type_=type_, month=month)
 
 
 @router.delete("/{operation_id}", response_model=NoneType)
