@@ -88,17 +88,21 @@ class Operation(BaseModel):
 
 
     @staticmethod
-    async def get_operation_by_category_id(category_id: int, month: int) -> list[dict]:
+    async def get_operation_by_category_id_or_type(
+        month: int, type_: CategoryTypeEnum | None = None, category_id: int | None = None
+    ) -> list[dict]:
+        conditions = [extract("month", Operation.date) == month]
+        if category_id:
+            conditions.append(Operation.category_id == category_id)
+        if type_:
+            conditions.append(Operation.type_ == type_)
         async with async_session() as session:
             result = await session.execute(
                 select(Operation, Category.name, Currency)
                 .join(Category, Category.id == Operation.category_id)
                 .join(Budget, Budget.id == Operation.budget_id)
                 .join(Currency, Currency.id == Budget.currency_id)
-                .where(and_(
-                    Operation.category_id == category_id,
-                    extract("month", Operation.date) == month
-                ))
+                .where(and_(*conditions))
             )
             results = []
             for operation, category_name, currency in result.all():
