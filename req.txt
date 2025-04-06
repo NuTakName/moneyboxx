@@ -8,3 +8,6 @@ psycopg2-binary==2.9.10
 uvicorn==0.34.0
 pydantic==2.10.5
 starlette==0.41.3
+loguru==0.7.3
+notifiers==1.3.5
+orjson==3.10.16
