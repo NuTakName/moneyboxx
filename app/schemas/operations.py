@@ -28,7 +28,7 @@ class OperationResponseSchema(OperationSchema):
 class OperationAndCategoryResponseSchema(OperationResponseSchema):
     category_name: str
     currency_code: str
-    currency_symbol: str
+    currency_symbol: str | None = None
 
 class OperationTotalAmount(BaseModel):
     total_amount_income: int
