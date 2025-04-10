@@ -1,12 +1,15 @@
 import datetime
+from typing import Union
 
 from sqlalchemy.dialects import postgresql
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import Integer, String, BIGINT, ForeignKey, Boolean, select
+
 
 from core.base import BaseModel
 from core.async_session import async_session
+from core.models.currency import Currency
 
-from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import Integer, String, BIGINT, ForeignKey, Boolean, select
 
 
 class MoneyBox(BaseModel):
@@ -42,9 +45,16 @@ class MoneyBox(BaseModel):
     )
 
     @staticmethod
-    async def get_moneybox(moneybox_id: int) -> "MoneyBox":
+    async def get_moneybox(moneybox_id: int) -> Union["MoneyBox", None]:
         async with async_session() as session:
-            result = await session.execute(
-                select(MoneyBox).where(MoneyBox.id == moneybox_id)
+            query = await session.execute(
+                select(MoneyBox, Currency)
+                .join(Currency, Currency.id == MoneyBox.currency_id)
+                .where(MoneyBox.id == moneybox_id)
             )
-            return result.scalars().first()
+            result = query.first()
+            if result:
+                moneybox, currency = result
+                moneybox = moneybox.to_dict()
+                moneybox["currency"] = currency
+                return moneybox
