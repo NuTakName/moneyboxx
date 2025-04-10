@@ -24,3 +24,12 @@ class UserResponseSchema(UserSchema):
 class UserCurrentBudget(BaseModel):
     user_id: int = Field(ge=0)
     current_budget: int = Field(ge=0)
+
+
+class UserMoneyboxSchema(BaseModel):
+    user_id: int = Field(ge=0)
+    current_moneybox: int = Field(ge=0)
+
+class BonusSchema(BaseModel):
+    user_id: int = Field(ge=0)
+    money: int = Field(ge=0)

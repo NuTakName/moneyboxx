@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from core.models.user import User
-from app.schemas.users import UserSchema, UserResponseSchema, UserCurrentBudget
+from app.schemas.users import UserSchema, UserResponseSchema, UserCurrentBudget, BonusSchema, UserMoneyboxSchema
 
 router = APIRouter(
     prefix="/users",
@@ -37,3 +37,21 @@ async def set_current_budget(data: UserCurrentBudget):
     else:
         raise HTTPException(status_code=404, detail="User not found")
 
+
+
+@router.patch("/collect_bonus", response_model=UserResponseSchema)
+async def get_bonus(data: BonusSchema):
+    user = await User.collect_bonus(user_id=data.user_id, money=data.money)
+    if user:
+        return user
+    else:
+        raise HTTPException(status_code=404, detail="User not found")
+
+
+@router.patch("/set_current_moneybox", response_model=UserResponseSchema)
+async def set_current_moneybox(data: UserMoneyboxSchema):
+    user = await User.set_current_moneybox(user_id=data.user_id, current_moneybox=data.current_moneybox)
+    if user:
+        return user
+    else:
+        raise HTTPException(status_code=404, detail="User not found")
