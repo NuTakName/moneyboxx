@@ -47,3 +47,28 @@ class User(BaseModel):
             )
             await session.commit()
             return result.scalars().first()
+
+
+    @staticmethod
+    async def collect_bonus(user_id: int, money: int):
+        async with async_session() as session:
+            result = await session.execute(
+                update(User).where(User.id == user_id)
+                .values(money=money, get_bonus=True)
+                .returning(User)
+            )
+            await session.commit()
+            return result.scalars().first()
+
+
+
+    @staticmethod
+    async def set_current_moneybox(user_id: int, current_moneybox: int) -> "User":
+        async with async_session() as session:
+            result = await session.execute(
+                update(User).where(User.id == user_id)
+                .values(current_moneybox=current_moneybox)
+                .returning(User)
+            )
+            await session.commit()
+            return result.scalars().first()
