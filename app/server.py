@@ -8,7 +8,7 @@ from notifiers.logging import NotificationHandler
 from starlette.middleware.cors import CORSMiddleware
 
 from app.error_handlers import validation_exception_handler, internal_exception_handler
-from app.routers import users, budgets, currency, categories, operations
+from app.routers import users, budgets, currency, categories, operations, moneybox
 from config import settings
 
 app = FastAPI()
@@ -34,6 +34,7 @@ app.include_router(budgets.router)
 app.include_router(currency.router)
 app.include_router(categories.router)
 app.include_router(operations.router)
+app.include_router(moneybox.router)
 
 
 
