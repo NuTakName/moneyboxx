@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from app.schemas.moneybox import MoneyboxResponseSchema, MoneyboxSchema
+from app.schemas.moneybox import MoneyboxResponseSchema, MoneyboxSchema, GetMoneyboxResponseSchema
 from core.models.moneybox import MoneyBox
 
 
@@ -10,7 +10,7 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-@router.get("/{moneybox_id}", response_model=MoneyboxResponseSchema)
+@router.get("/{moneybox_id}", response_model=GetMoneyboxResponseSchema)
 async def get_moneybox(moneybox_id: int):
     moneybox = await MoneyBox.get_moneybox(moneybox_id=moneybox_id)
     if moneybox:
