@@ -42,7 +42,9 @@ async def add_moneybox(data: MoneyboxSchema):
 
 @router.patch("/update_current_balance", response_model=MoneyboxResponseSchema)
 async def update_current_balance(data: UpdateCurrentBalanceSchema):
-    moneybox = await MoneyBox.update_current_balance(moneybox_id=data.id, amount=data.amount)
+    moneybox = await MoneyBox.update_current_balance(
+        moneybox_id=data.id, amount=data.amount, is_finished=data.is_finished
+    )
     if moneybox:
         return moneybox
     else:

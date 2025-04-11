@@ -27,3 +27,4 @@ class GetMoneyboxResponseSchema(MoneyboxResponseSchema):
 class UpdateCurrentBalanceSchema(BaseModel):
     id: int = Field(ge=0)
     amount: int = Field(ge=0)
+    is_finished: bool = False
