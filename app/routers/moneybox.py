@@ -1,6 +1,11 @@
 from fastapi import APIRouter, HTTPException
 
-from app.schemas.moneybox import MoneyboxResponseSchema, MoneyboxSchema, GetMoneyboxResponseSchema
+from app.schemas.moneybox import (
+    MoneyboxResponseSchema,
+    MoneyboxSchema,
+    GetMoneyboxResponseSchema,
+    UpdateCurrentBalanceSchema
+)
 from core.models.moneybox import MoneyBox
 
 
@@ -31,3 +36,12 @@ async def add_moneybox(data: MoneyboxSchema):
         goal_date=data.goal_date
     )
     return await moneybox.add()
+
+
+@router.patch("/update_current_balance", response_model=MoneyboxResponseSchema)
+async def update_current_balance(data: UpdateCurrentBalanceSchema):
+    moneybox = await MoneyBox.update_current_balance(moneybox_id=data.id, amount=data.amount)
+    if moneybox:
+        return moneybox
+    else:
+        raise HTTPException(status_code=404, detail="Moneybox not found")

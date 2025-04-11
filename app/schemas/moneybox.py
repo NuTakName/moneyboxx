@@ -22,3 +22,8 @@ class MoneyboxResponseSchema(MoneyboxSchema):
 
 class GetMoneyboxResponseSchema(MoneyboxResponseSchema):
     currency: CurrencyResponseSchema
+
+
+class UpdateCurrentBalanceSchema(BaseModel):
+    id: int = Field(ge=0)
+    amount: int = Field(ge=0)
