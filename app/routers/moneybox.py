@@ -1,3 +1,5 @@
+from types import NoneType
+
 from fastapi import APIRouter, HTTPException
 
 from app.schemas.moneybox import (
@@ -43,5 +45,20 @@ async def update_current_balance(data: UpdateCurrentBalanceSchema):
     moneybox = await MoneyBox.update_current_balance(moneybox_id=data.id, amount=data.amount)
     if moneybox:
         return moneybox
+    else:
+        raise HTTPException(status_code=404, detail="Moneybox not found")
+
+
+
+@router.get("/list/{user_id}", response_model=list[MoneyboxResponseSchema])
+async def get_list_moneybox(user_id: int):
+    return await MoneyBox.get_list(user_id=user_id)
+
+
+@router.delete('/{moneybox_id}', response_model=NoneType)
+async def delete_moneybox(moneybox_id: int):
+    moneybox = await MoneyBox.get(moneybox_id=moneybox_id)
+    if moneybox:
+        await moneybox.delete()
     else:
         raise HTTPException(status_code=404, detail="Moneybox not found")
