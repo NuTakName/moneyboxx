@@ -3,7 +3,7 @@ from typing import Union
 
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import Integer, String, BIGINT, ForeignKey, Boolean, select
+from sqlalchemy import Integer, String, BIGINT, ForeignKey, Boolean, select, update
 
 
 from core.base import BaseModel
@@ -58,3 +58,15 @@ class MoneyBox(BaseModel):
                 moneybox = moneybox.to_dict()
                 moneybox["currency"] = currency
                 return moneybox
+
+
+    @staticmethod
+    async def update_current_balance(moneybox_id: int, amount: int) -> "MoneyBox":
+        async with async_session() as session:
+            query = await session.execute(
+                update(MoneyBox).where(MoneyBox.id == moneybox_id)
+                .values(current_balance=MoneyBox.current_balance + amount)
+                .returning(MoneyBox)
+            )
+            await session.commit()
+            return query.scalars().first()
