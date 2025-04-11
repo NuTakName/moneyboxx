@@ -61,11 +61,11 @@ class MoneyBox(BaseModel):
 
 
     @staticmethod
-    async def update_current_balance(moneybox_id: int, amount: int) -> "MoneyBox":
+    async def update_current_balance(moneybox_id: int, amount: int, is_finished: bool) -> "MoneyBox":
         async with async_session() as session:
             query = await session.execute(
                 update(MoneyBox).where(MoneyBox.id == moneybox_id)
-                .values(current_balance=MoneyBox.current_balance + amount)
+                .values(current_balance=MoneyBox.current_balance + amount, is_finished=is_finished)
                 .returning(MoneyBox)
             )
             await session.commit()
