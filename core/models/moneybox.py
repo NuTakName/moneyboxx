@@ -70,3 +70,21 @@ class MoneyBox(BaseModel):
             )
             await session.commit()
             return query.scalars().first()
+
+
+    @staticmethod
+    async def get_list(user_id: int) -> list["MoneyBox"]:
+        async with async_session() as session:
+            result = await session.execute(
+                select(MoneyBox).where(MoneyBox.user_id == user_id)
+            )
+            return result.scalars().all()
+
+
+    @staticmethod
+    async def get(moneybox_id: int) -> "MoneyBox":
+        async with async_session() as session:
+            result = await session.execute(
+                select(MoneyBox).where(MoneyBox.id == moneybox_id)
+            )
+            return result.scalars().first()
