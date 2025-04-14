@@ -13,7 +13,9 @@ from sqlalchemy import (
     update,
     and_,
     extract,
-    func, case
+    func,
+    case,
+    desc
 )
 
 from app.schemas.operations import UpdateOperationSchema
@@ -22,6 +24,8 @@ from core.async_session import async_session
 from core.models.category import CategoryTypeEnum, Category
 from core.models.currency import Currency
 from core.models.budget import Budget
+from core.models.user import User
+from core.models.moneybox import MoneyBox
 
 
 class Operation(BaseModel):
@@ -181,3 +185,75 @@ class Operation(BaseModel):
             result = query.first()
             data = {"difference": result[0] - result[1]}
             return data
+
+
+    @staticmethod
+    async def get_statistic(user_id: int) -> Union[dict, None]:
+        async with async_session() as session:
+            query = await session.execute(
+                select(
+                    func.sum(case((and_(
+                        Operation.type_ == CategoryTypeEnum.income,
+                        Operation.budget_id == User.current_budget), Operation.value),
+                        else_=0)),
+                    func.sum(case((and_(
+                        Operation.type_ == CategoryTypeEnum.expense,
+                        Operation.budget_id == User.current_budget), Operation.value),
+                        else_=0)),
+                    func.count(MoneyBox.id).filter(MoneyBox.user_id == user_id, MoneyBox.is_finished.is_(True)),
+                    Currency
+                )
+                .join(User, User.current_budget == Operation.budget_id)
+                .outerjoin(MoneyBox, MoneyBox.user_id == User.id)
+                .join(Budget, Budget.id == Operation.budget_id)
+                .join(Currency, Currency.id == Budget.currency_id)
+                .where(User.id == user_id)
+                .group_by(Currency)
+            )
+            result = query.first()
+            data = {}
+            if result:
+                total_amount_income, total_amount_expense, count_moneybox, currency = result
+                data["total_amount_income"] = total_amount_income
+                data["total_amount_expense"] = total_amount_expense
+                data["count_moneybox"] = count_moneybox
+                data["currency"] = currency
+                return data
+
+
+
+    @staticmethod
+    async def get_statistic_for_period(user_id: int, month: int, year: int) -> list[dict]:
+        conditions = [User.id == user_id]
+        if month:
+            conditions.append(extract("month", Operation.date) == month)
+        if year:
+            conditions.append(extract("year", Operation.date) == year)
+        async with async_session() as session:
+            query = await session.execute(
+                select(Operation, Category.name, Currency)
+                .join(User, User.current_budget == Operation.budget_id)
+                .join(Category, Category.id == Operation.category_id)
+                .join(Budget, Budget.id == Operation.budget_id)
+                .join(Currency, Currency.id == Budget.currency_id)
+                .where(and_(*conditions))
+                .order_by(desc(Operation.value))
+            )
+            result = []
+            for operation, category_name, currency in query.all():
+                operation = operation.to_dict()
+                operation["category_name"] = category_name
+                operation["currency"] = currency
+                result.append(operation)
+            return result
+
+
+    @staticmethod
+    async def get_list_operations(user_id: int) -> list["Operation"]:
+        async with async_session() as session:
+            result = await session.execute(
+                select(Operation)
+                .join(User, User.current_budget == Operation.budget_id)
+                .where(User.id == user_id)
+            )
+            return result.scalars().all()
