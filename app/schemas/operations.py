@@ -2,6 +2,7 @@ import datetime
 
 from pydantic import BaseModel, Field
 
+from app.schemas.currency import CurrencyResponseSchema
 from core.models.category import CategoryTypeEnum
 
 class BaseOperationSchema(BaseModel):
@@ -30,9 +31,23 @@ class OperationAndCategoryResponseSchema(OperationResponseSchema):
     currency_code: str
     currency_symbol: str | None = None
 
-class OperationTotalAmount(BaseModel):
+class OperationTotalAmountSchema(BaseModel):
     total_amount_income: int
     total_amount_expense: int
 
 class DifferenceResponseSchema(BaseModel):
     difference: int
+
+
+class StatisticResponseSchema(OperationTotalAmountSchema):
+    count_moneybox: int
+    currency: CurrencyResponseSchema
+
+class StatisticSchema(BaseModel):
+    user_id: int = Field(ge=0)
+    month: int | None = None
+    year: int | None = None
+
+class OperationStatisticResponseSchema(OperationResponseSchema):
+    category_name: str
+    currency: CurrencyResponseSchema

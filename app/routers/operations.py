@@ -7,8 +7,11 @@ from app.schemas.operations import (
     OperationResponseSchema,
     OperationAndCategoryResponseSchema,
     UpdateOperationSchema,
-    OperationTotalAmount,
-    DifferenceResponseSchema
+    OperationTotalAmountSchema,
+    DifferenceResponseSchema,
+    StatisticResponseSchema,
+    StatisticSchema,
+    OperationStatisticResponseSchema
 )
 from core.models.category import CategoryTypeEnum
 from core.models.operation import Operation
@@ -72,7 +75,7 @@ async def delete_operation(operation_id: int):
         raise HTTPException(status_code=404, detail="Operation not found")
 
 
-@router.get("/total_amount/{month}/{current_budget_id}", response_model=OperationTotalAmount)
+@router.get("/total_amount/{month}/{current_budget_id}", response_model=OperationTotalAmountSchema)
 async def get_total_amount(month: int, current_budget_id: int):
     total_amount = await Operation.get_total_amount(
         month=month, current_budget_id=current_budget_id
@@ -82,3 +85,26 @@ async def get_total_amount(month: int, current_budget_id: int):
 @router.get("/difference/{current_budget_id}", response_model=DifferenceResponseSchema)
 async def get_difference(current_budget_id: int):
     return await Operation.get_difference(current_budget_id=current_budget_id)
+
+
+@router.get("/statistic/{user_id}", response_model=StatisticResponseSchema)
+async def get_statistic(user_id: int):
+    statistic = await Operation.get_statistic(user_id=user_id)
+    if statistic:
+        return statistic
+    else:
+        raise HTTPException(status_code=404, detail="Statistic not found")
+
+
+@router.post("/get_statistic_for_period", response_model=list[OperationStatisticResponseSchema])
+async def get_statistic_for_period(data: StatisticSchema):
+    print(data)
+    statistic = await Operation.get_statistic_for_period(
+        user_id=data.user_id, month=data.month, year=data.year
+    )
+    return statistic
+
+
+@router.get("/list_operations/{user_id}", response_model=list[OperationResponseSchema])
+async def get_list_operations(user_id: int):
+    return await Operation.get_list_operations(user_id=user_id)
