@@ -98,7 +98,6 @@ async def get_statistic(user_id: int):
 
 @router.post("/get_statistic_for_period", response_model=list[OperationStatisticResponseSchema])
 async def get_statistic_for_period(data: StatisticSchema):
-    print(data)
     statistic = await Operation.get_statistic_for_period(
         user_id=data.user_id, month=data.month, year=data.year
     )
