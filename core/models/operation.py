@@ -200,7 +200,8 @@ class Operation(BaseModel):
                         Operation.type_ == CategoryTypeEnum.expense,
                         Operation.budget_id == User.current_budget), Operation.value),
                         else_=0)),
-                    func.count(MoneyBox.id).filter(MoneyBox.user_id == user_id, MoneyBox.is_finished.is_(True)),
+                    func.count(MoneyBox.id.distinct())
+                    .filter(MoneyBox.user_id == user_id, MoneyBox.is_finished.is_(True)),
                     Currency
                 )
                 .join(User, User.current_budget == Operation.budget_id)
